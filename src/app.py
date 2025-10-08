@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app)
 MODEL_PATH = "model/model.pkl"
 ENCODER_PATH = "model/encoders.pkl"
-DATA_PATH = "data/gabungan_data_hasil_clean.xlsx"
+DATA_PATH = "data/dataset.xlsx"
 
 # Load model & encoder jika ada
 model = None
@@ -57,11 +57,22 @@ def predict():
         print(today)
 
         # Prediksi
-        prediction = model.predict([encoded])[0]
+        prediction = model.predict([encoded])
+
+        if prediction is None:
+            return jsonify({
+                "success": False,
+                "message": "Estimasi tidak ditemukan."
+            }), 404       
+
+        prediction_value = int(round(float(prediction)))
 
         return jsonify({
             "success": True,
-            "estimated_cost": int(prediction)
+            "estimated_cost": prediction_value,
+            "brand": input_data['MEREK'],
+            "type": input_data['TIPE UNIT'],
+            "damage": input_data['KERUSAKAN']
         })
 
     except Exception as e:
